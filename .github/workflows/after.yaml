@@ -6,7 +6,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 
@@ -17,27 +19,40 @@ jobs:
           path: node_modules
           key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
-      - name: Install (Only if cache miss)
+      - name: Cache Docker Layers
+        uses: jpribyl/action-docker-layer-caching@v0.1.1
+        continue-on-error: true
+
+      - name: Install & Pre-pull Images
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci --legacy-peer-deps
+        run: |
+          npm ci --legacy-peer-deps
+          docker compose -f docker/docker-compose.poc.yml pull --quiet
 
   run-tests-parallel:
-    runs-on: ubuntu-slim
     needs: warm-up
+    runs-on: ubuntu-latest # Required for Docker support
     strategy:
+      fail-fast: false
       matrix:
+        # Fan out into 5 parallel runners
         project: [api-1, api-2, api-3, api-4, api-5]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Restore Node Modules
+      - name: Restore Shared node_modules
         uses: actions/cache@v4
         with:
           path: node_modules
           key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           fail-on-cache-miss: true # Guarantees we use the warm-up data
 
+      - name: Restore Docker Layers
+        uses: jpribyl/action-docker-layer-caching@v0.1.1
+        continue-on-error: true
+
       - name: Run Parallel Test
         run: |
+          # Use specific project name per matrix item to avoid network collisions
           PROJECTS="${{ matrix.project }}" \
           docker compose -f docker/docker-compose.poc.yml --project-name "poc-${{ matrix.project }}" run run-poc-tests
