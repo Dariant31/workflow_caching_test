@@ -1,0 +1,22 @@
+name: 🔴 Benchmark (No Optimization)
+on: [push]
+
+jobs:
+  sequential-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Dependencies (Slow)
+        run: npm install # Takes ~2-3 mins every time
+
+      - name: Run 5 Projects Sequentially
+        # This one job runs everything, making the bar very long
+        run: |
+          PROJECTS="api-1,api-2,api-3,api-4,api-5" \
+          docker compose -f docker/docker-compose.poc.yml run run-poc-tests

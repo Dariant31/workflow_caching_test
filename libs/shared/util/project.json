@@ -1,0 +1,19 @@
+{
+  "name": "shared-util",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/common/nestjs/shared/util/src",
+  "projectType": "library",
+  "tags": ["scope:common", "context:nestjs", "type:util"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "options": {
+        "jestConfig": "libs/common/nestjs/shared/util/jest.config.ts"
+      }
+    }
+  }
+}
