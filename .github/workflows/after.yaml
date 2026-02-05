@@ -1,46 +1,32 @@
-name: 🟢 Optimized CI (Parallel + Cache)
+name: 🟢 Optimized CI (The Winner)
 on: [push]
 
 jobs:
+  # This job just ensures the npm cache is ready
   warm-up:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Cache Node & Docker
-        uses: actions/cache@v4
+      - uses: actions/setup-node@v4
         with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
-      - name: Cache Docker Layers
-        uses: jpribyl/action-docker-layer-caching@v0.1.1
-        continue-on-error: true
-
-      - name: Warm-up Install & Pull
-        run: |
-          npm ci --prefer-offline --no-audit
-          docker compose -f docker/docker-compose.poc.yml pull --quiet
+          node-version: 22
+          cache: 'npm' # Use the built-in optimized cache
+      - run: npm ci
 
   run-tests-parallel:
     needs: warm-up
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        # Fan out into 5 parallel runners!
+        # Fanning out into 5 parallel runners
         project: [api-1, api-2, api-3, api-4, api-5]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Restore Shared node_modules
-        uses: actions/cache@v4
+      - uses: actions/setup-node@v4
         with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          fail-on-cache-miss: true # Copilot-style guard
-
-      - name: Restore Docker Layers
-        uses: jpribyl/action-docker-layer-caching@v0.1.1
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci # This will now be a 10-second "hit"
 
       - name: Run Parallel Test
         run: |

@@ -1,15 +1,9 @@
-// tools/stress-util.ts
 export const heavyTask = async (name: string) => {
   console.log(`--- Starting Heavy Task for ${name} ---`);
-
-  // 1. Simulate CPU Load (Calculating Primes)
+  // Increase CPU stress to 5 seconds
   const start = Date.now();
-  while (Date.now() - start < 2000) {
-    Math.sqrt(Math.random() * 1000000);
-  }
-
-  // 2. Simulate Network/Database Latency
-  await new Promise(resolve => setTimeout(resolve, 3000));
-
+  while (Date.now() - start < 5000) { Math.sqrt(Math.random()); }
+  // Increase Latency stress to 10 seconds
+  await new Promise(resolve => setTimeout(resolve, 10000));
   console.log(`--- Finished Heavy Task for ${name} ---`);
 };
