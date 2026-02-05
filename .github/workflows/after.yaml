@@ -22,7 +22,7 @@ jobs:
         run: npm ci --legacy-peer-deps
 
   run-tests-parallel:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: warm-up
     strategy:
       matrix:
