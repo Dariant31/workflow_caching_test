@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { heavyTask } from '@shared/util';
 
-describe('Heavy Integration Suite (API 1)', () => {
+describe('Heavy Integration Suite (API 2)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
